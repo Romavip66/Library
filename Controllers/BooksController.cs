@@ -7,22 +7,24 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LibraryCourse.Data;
 using LibraryCourse.Models;
+using LibraryCourse.Services;
 
 namespace LibraryCourse.Controllers
 {
     public class BooksController : Controller
     {
-        private readonly LibraryContext _context;
+        private readonly BooksService _booksService;
 
-        public BooksController(LibraryContext context)
+        public BooksController(BooksService booksService)
         {
-            _context = context;
+            _booksService = booksService;
         }
 
         // GET: Books
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Books.ToListAsync());
+            var books = await _booksService.GetBooks();
+            return View(books);
         }
 
         // GET: Books/Details/5
@@ -33,8 +35,7 @@ namespace LibraryCourse.Controllers
                 return NotFound();
             }
 
-            var books = await _context.Books
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var books = await _booksService.DetailsBooks(id);
             if (books == null)
             {
                 return NotFound();
@@ -58,8 +59,8 @@ namespace LibraryCourse.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(books);
-                await _context.SaveChangesAsync();
+               
+                await _booksService.AddAndSave(books);
                 return RedirectToAction(nameof(Index));
             }
             return View(books);
@@ -73,7 +74,7 @@ namespace LibraryCourse.Controllers
                 return NotFound();
             }
 
-            var books = await _context.Books.FindAsync(id);
+            var books = await _booksService.DetailsBooks(id);
             if (books == null)
             {
                 return NotFound();
@@ -97,8 +98,7 @@ namespace LibraryCourse.Controllers
             {
                 try
                 {
-                    _context.Update(books);
-                    await _context.SaveChangesAsync();
+                    await _booksService.Update(books);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -124,8 +124,7 @@ namespace LibraryCourse.Controllers
                 return NotFound();
             }
 
-            var books = await _context.Books
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var books = await _booksService.DetailsBooks(id);
             if (books == null)
             {
                 return NotFound();
@@ -139,15 +138,14 @@ namespace LibraryCourse.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var books = await _context.Books.FindAsync(id);
-            _context.Books.Remove(books);
-            await _context.SaveChangesAsync();
+            var books = await _booksService.DetailsBooks(id);
+            await _booksService.Delete(books);
             return RedirectToAction(nameof(Index));
         }
 
         private bool BooksExists(int id)
         {
-            return _context.Books.Any(e => e.Id == id);
+            return _booksService.BooksExis(id);
         }
     }
 }
