@@ -7,32 +7,30 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LibraryCourse.Data;
 using LibraryCourse.Models;
-using LibraryCourse.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LibraryCourse.Controllers
 {
+    [Authorize]
     public class HistoryController : Controller
     {
-        private readonly HistoryService _historyService;
+        private readonly LibraryContext _context;
 
-        public HistoryController(HistoryService historyService)
+        public HistoryController(LibraryContext context)
         {
-            _historyService = historyService;
+            _context = context;
         }
 
         // GET: History
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            var history = await _historyService.GetHistory();
-            return View(history);
+            var libraryContext = _context.History.Include(h => h.Books).Include(h => h.Library_Card);
+            return View(await libraryContext.ToListAsync());
         }
 
-        /// <summary>
-        /// //////
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
         // GET: History/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -40,7 +38,10 @@ namespace LibraryCourse.Controllers
                 return NotFound();
             }
 
-            var history = await _historyService.DetailsHistory(id);
+            var history = await _context.History
+                .Include(h => h.Books)
+                .Include(h => h.Library_Card)
+                .FirstOrDefaultAsync(m => m.CardId == id);
             if (history == null)
             {
                 return NotFound();
@@ -52,8 +53,8 @@ namespace LibraryCourse.Controllers
         // GET: History/Create
         public IActionResult Create()
         {
-            ViewData["BookId"] = new SelectList(_historyService.getBooks(), "Id", "Id");
-            ViewData["CardId"] = new SelectList(_historyService.getCard(), "Id", "Id");
+            ViewData["BookId"] = new SelectList(_context.Books, "Id", "Id");
+            ViewData["CardId"] = new SelectList(_context.Library_Card, "Id", "Id");
             return View();
         }
 
@@ -66,11 +67,12 @@ namespace LibraryCourse.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _historyService.AddAndSave(history);
+                _context.Add(history);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BookId"] = new SelectList(_historyService.getBooks(), "Id", "Id", history.BookId);
-            ViewData["CardId"] = new SelectList(_historyService.getCard(), "Id", "Id", history.CardId);
+            ViewData["BookId"] = new SelectList(_context.Books, "Id", "Id", history.BookId);
+            ViewData["CardId"] = new SelectList(_context.Library_Card, "Id", "Id", history.CardId);
             return View(history);
         }
 
@@ -82,13 +84,13 @@ namespace LibraryCourse.Controllers
                 return NotFound();
             }
 
-            var history = await _historyService.DetailsHistory(id);
+            var history = await _context.History.FindAsync(id);
             if (history == null)
             {
                 return NotFound();
             }
-            ViewData["BookId"] = new SelectList(_historyService.getBooks(), "Id", "Id", history.BookId);
-            ViewData["CardId"] = new SelectList(_historyService.getCard(), "Id", "Id", history.CardId);
+            ViewData["BookId"] = new SelectList(_context.Books, "Id", "Id", history.BookId);
+            ViewData["CardId"] = new SelectList(_context.Library_Card, "Id", "Id", history.CardId);
             return View(history);
         }
 
@@ -108,7 +110,8 @@ namespace LibraryCourse.Controllers
             {
                 try
                 {
-                    await _historyService.Update(history);
+                    _context.Update(history);
+                    await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -123,8 +126,8 @@ namespace LibraryCourse.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BookId"] = new SelectList(_historyService.getBooks(), "Id", "Id", history.BookId);
-            ViewData["CardId"] = new SelectList(_historyService.getCard(), "Id", "Id", history.CardId);
+            ViewData["BookId"] = new SelectList(_context.Books, "Id", "Id", history.BookId);
+            ViewData["CardId"] = new SelectList(_context.Library_Card, "Id", "Id", history.CardId);
             return View(history);
         }
 
@@ -136,7 +139,10 @@ namespace LibraryCourse.Controllers
                 return NotFound();
             }
 
-            var history = await _historyService.DetailsHistory(id);
+            var history = await _context.History
+                .Include(h => h.Books)
+                .Include(h => h.Library_Card)
+                .FirstOrDefaultAsync(m => m.CardId == id);
             if (history == null)
             {
                 return NotFound();
@@ -150,14 +156,15 @@ namespace LibraryCourse.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var history = await _historyService.DetailsHistory(id);
-            await _historyService.Delete(history);
+            var history = await _context.History.FindAsync(id);
+            _context.History.Remove(history);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool HistoryExists(int id)
         {
-            return _historyService.HistoryExis(id);
+            return _context.History.Any(e => e.CardId == id);
         }
     }
 }

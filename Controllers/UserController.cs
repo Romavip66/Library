@@ -56,16 +56,16 @@ namespace LibraryCourse.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> IsLoginInUse(string Login)
         {
-            var userList = await _context.Users.ToListAsync();
-            bool test = false;
-            foreach (User u in userList)
-            {
-                if (u.Login.Equals(Login))
-                {
-                    test = true;
-                 }
-            }
-            if (test)
+            var userList = await _context.Users.Where(u=>u.Login==Login).FirstOrDefaultAsync();
+            //bool test = false;
+            //foreach (User u in userList)
+            //{
+            //    if (u.Login.Equals(Login))
+            //    {
+            //        test = true;
+            //     }
+            //}
+            if (userList==null)
             {
                 return Json($"Login {Login} is already in use");
             }

@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+
+
 
 <html>
 <head>
@@ -26,17 +29,37 @@
                     <a class="nav-link" asp-controller="LibraryCard" asp-action="Index">LibraryCard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Queue" asp-action="Index">Queue</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" asp-controller="Requests" asp-action="Index">Requests</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Role" asp-action="Index">Role</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="User" asp-action="Index">User</a>
-                </li>
+                
+
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                @*If the user is signed-in display Logout link*@
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <li class="nav-item">
+                        <form method="post" asp-controller="account" asp-action="logout">
+                            <button type="submit" style="width:auto"
+                                    class="nav-link btn btn-link py-0">
+                                Logout @User.Identity.Name
+                            </button>
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="account" asp-action="register">
+                            Register
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="account" asp-action="login">
+                            Login
+                        </a>
+                    </li>
+                }
             </ul>
         </div>
     </nav>
@@ -45,5 +68,7 @@
     <div class="container">
         @RenderBody()
     </div>
+
+
 </body>
 </html>

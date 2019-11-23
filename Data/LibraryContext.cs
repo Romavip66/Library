@@ -1,4 +1,5 @@
 ﻿using LibraryCourse.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace LibraryCourse.Data
 {
-    public class LibraryContext : DbContext
+    public class LibraryContext : IdentityDbContext
+
     {
         public LibraryContext(DbContextOptions options) : base(options)
         {
@@ -25,6 +27,7 @@ namespace LibraryCourse.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
           //User to Library Card One to One
             modelBuilder.Entity<User>()
                 .HasOne(p => p.Library_Card)
@@ -65,6 +68,7 @@ namespace LibraryCourse.Data
                 .HasOne(pt => pt.Books)
                 .WithMany(t => t.History)
                 .HasForeignKey(pt => pt.BookId);
+
 
         }
 

@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LibraryCourse.Data;
 using LibraryCourse.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LibraryCourse.Controllers
 {
+    [Authorize]
     public class QueueController : Controller
     {
         private readonly LibraryContext _context;
@@ -20,6 +22,7 @@ namespace LibraryCourse.Controllers
         }
 
         // GET: Queue
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var libraryContext = _context.Queue.Include(q => q.Books).Include(q => q.Library_Card);
@@ -27,6 +30,7 @@ namespace LibraryCourse.Controllers
         }
 
         // GET: Queue/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
