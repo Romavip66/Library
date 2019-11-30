@@ -20,6 +20,13 @@ namespace LibraryCourse
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            
+            services.AddSession(options =>
+            {
+                // Set a short timeout for easy testing.
+                options.IdleTimeout = TimeSpan.FromSeconds(3600);
+                });
+
             services.AddDbContext<LibraryContext>(options =>
             {
                 options.UseSqlite("Filename=library.db");
@@ -45,12 +52,15 @@ namespace LibraryCourse
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseHttpsRedirection();
+            app.UseSession();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     "default",
                     "{controller=Books}/{action=Index}/{id?}");
-            });
+            }); 
+            
         }
     }
 }
