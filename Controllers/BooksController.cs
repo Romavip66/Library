@@ -25,6 +25,12 @@ namespace LibraryCourse.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
+            ViewBag.MyStatus = TempData["status"];
+            ViewBag.MyId = TempData["id"];
+            ViewBag.MyId2 = TempData["id2"];
+
+            /*TempData.Keep("status");
+            TempData.Keep("id");*/
             return View(await _context.Books.ToListAsync());
         }
 
@@ -44,6 +50,8 @@ namespace LibraryCourse.Controllers
                 return NotFound();
             }
 
+            ViewBag.MyStatus = TempData["status"];
+            
             return View(books);
         }
 
@@ -63,6 +71,8 @@ namespace LibraryCourse.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(books);
+                TempData["status"] = $"Book - '{books.Book_Name}' successfully added";
+                TempData["id"] = books.Book_Name;
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -102,6 +112,7 @@ namespace LibraryCourse.Controllers
                 try
                 {
                     _context.Update(books);
+                    TempData["id2"] = books.Book_Name;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
