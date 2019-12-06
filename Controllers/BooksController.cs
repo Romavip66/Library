@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using LibraryCourse.Data;
 using LibraryCourse.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace LibraryCourse.Controllers
 {
@@ -15,6 +17,9 @@ namespace LibraryCourse.Controllers
     public class BooksController : Controller
     {
         private readonly LibraryContext _context;
+        const string SessionName = "_Name";
+        const string SessionAge = "_Age";
+        const string SessionKeyDate = "_Date";
 
         public BooksController(LibraryContext context)
         {
@@ -25,6 +30,9 @@ namespace LibraryCourse.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
+            
+
+            //TempData
             ViewBag.MyStatus = TempData["status"];
             ViewBag.MyId = TempData["id"];
             ViewBag.MyId2 = TempData["id2"];
@@ -49,6 +57,10 @@ namespace LibraryCourse.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Name = HttpContext.Session.GetString(SessionName);
+            ViewBag.Age = HttpContext.Session.GetInt32(SessionAge);
+            ViewBag.Date = HttpContext.Session.Get<DateTime>(SessionKeyDate);
+            
 
             ViewBag.MyStatus = TempData["status"];
             
@@ -71,8 +83,16 @@ namespace LibraryCourse.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(books);
+                //TempData
                 TempData["status"] = $"Book - '{books.Book_Name}' successfully added";
-                TempData["id"] = books.Book_Name;
+                TempData["id"] = books.Author_Name;
+
+
+                //Session
+                HttpContext.Session.SetString(SessionName, books.Book_Name);
+                HttpContext.Session.SetInt32(SessionAge, 20);
+                HttpContext.Session.Set<DateTime>(SessionKeyDate, DateTime.Now);
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -164,5 +184,32 @@ namespace LibraryCourse.Controllers
         {
             return _context.Books.Any(e => e.Id == id);
         }
+
     }
+}
+
+public static class SessionExtensions
+
+{
+
+    public static void Set<T>(this ISession session, string key, T value)
+
+    {
+
+        session.SetString(key, JsonConvert.SerializeObject(value));
+
+    }
+
+    public static T Get<T>(this ISession session, string key)
+
+    {
+
+        var value = session.GetString(key);
+
+        return value == null ? default(T) :
+
+        JsonConvert.DeserializeObject<T>(value);
+
+    }
+
 }
