@@ -1,5 +1,7 @@
 @model LibraryCourse.Models.Books
 
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -36,5 +38,10 @@
         <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
         <a asp-action="Index">Back to List</a>
     </div>
+    @if (Model.Book_Name.Equals(ViewBag.Name)) { 
+    <h4>@ViewBag.Name.</h4>
+    <h4>@ViewBag.Age</h4>
+    <h4>@ViewBag.Date</h4>
+    }
 </body>
 </html>
