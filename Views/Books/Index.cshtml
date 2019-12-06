@@ -1,6 +1,6 @@
 @model IEnumerable<LibraryCourse.Models.Books>
-@inject UserManager<IdentityUser> UserManager
-@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -41,41 +41,72 @@
         <tbody>
             @foreach (var item in Model)
             {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Book_Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Author_Name)
-                </td>
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Book_Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Author_Name)
+                    </td>
 
-                @if (item.Book_Name.Equals(ViewBag.MyId) && ViewBag.MyId2==null)
-                {
-                    <td>
-                        @ViewBag.MyStatus
-                    </td>
-                }
-                else if(item.Book_Name.Equals(ViewBag.MyId2))
-                {
-                    <td>
-                        Changed to @ViewBag.MyId2
-                    </td>
-                }
-                else
-                {
-                    <td></td>
-                }
-                <td>
-                    @if (SignInManager.IsSignedIn(User) && user.Email.Equals("rbekeshov@gmail.com"))
+                    @if (item.Author_Name.Equals(ViewBag.MyId) && ViewBag.MyId2 == null)
                     {
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <td>
+                            @ViewBag.MyStatus
+                        </td>
                     }
-                </td>
-            </tr>
+                    else if (item.Book_Name == ViewBag.MyId2)
+                    {
+                        <td>
+                            Changed to @ViewBag.MyId2
+                        </td>
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
+                    <td>
+                        @if (SignInManager.IsSignedIn(User) && user.Email.Equals("rbekeshov@gmail.com"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        }
+                    </td>
+                </tr>
             }
         </tbody>
     </table>
+
+
+    <div class="container">
+        <div class="row">&nbsp;</div>
+        <div class="row">
+            <div class="col-2">User</div>
+            <div class="col-4"><input type="text" id="userInput" /></div>
+        </div>
+        <div class="row">
+            <div class="col-2">Message</div>
+            <div class="col-4"><input type="text" id="messageInput" /></div>
+        </div>
+        <div class="row">&nbsp;</div>
+        <div class="row">
+            <div class="col-6">
+                <input type="button" id="sendButton" value="Send Message" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <hr />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <ul id="messagesList"></ul>
+        </div>
+    </div>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chat.js"></script>
 </body>
 </html>
